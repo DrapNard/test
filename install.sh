@@ -1,5 +1,6 @@
 #!/usr/bin/bash
 
+
 # Initialize the status variables for each program
 git_installed=0
 wget_installed=0
@@ -153,7 +154,6 @@ checkWSL() {
     fi
 }
 
-
 clear
 echo -e "⚠️ \033[1m\033[38;5;11mThis script requires superuser permission to install dependencies and check your system info.\033[0m ⚠️"
 echo "Do you want to continue? (y/n)"
@@ -162,10 +162,10 @@ if [[ ! "$Warn" =~ ^[Yy]$ ]]; then
     echo "Exiting."
     exit 1
 fi
-    echo
-    echo
-    echo Requesting root permision
-    sudo echo ✅ Access Granted
+echo
+echo
+echo Requesting root permision
+sudo echo ✅ Access Granted
 clear  # Clear the terminal screen
 echo ──────────────────────────────────────────────
 echo ULTMOS
@@ -215,11 +215,32 @@ then
     fi
 fi
 
+# Detect the package manager
+if command -v apt-get &> /dev/null; then
+    PACKAGE_MANAGER="apt-get"
+    INSTALL_CMD="sudo apt-get install -y"
+    PACKAGE_CHECK_CMD="dpkg -s"
+    ENABLE_SERVICE_CMD="sudo systemctl enable libvirtd"
+elif command -v pacman &> /dev/null; then
+    PACKAGE_MANAGER="pacman"
+    INSTALL_CMD="sudo pacman -S --noconfirm"
+    PACKAGE_CHECK_CMD="pacman -Qi"
+    ENABLE_SERVICE_CMD="sudo systemctl enable libvirtd"
+elif command -v yum &> /dev/null; then
+    PACKAGE_MANAGER="yum"
+    INSTALL_CMD="sudo yum install -y"
+    PACKAGE_CHECK_CMD="rpm -q"
+    ENABLE_SERVICE_CMD="sudo systemctl enable libvirtd"
+else
+    echo "Unsupported package manager. Please use a system with apt, pacman, or yum."
+    exit 1
+fi
+
 if [[ $git_installed -eq 1 && $wget_installed -eq 1 && $qemu_full_installed -eq 1 && $libvirt_installed -eq 1 && $dnsmasq_installed -eq 1 && $python_installed -eq 1 ]]
 then
     echo
 else
-    echo "Install Required Dependencies? (required admin permision) (y/n)"
+    echo "Install Required Dependencies? (required admin permission) (y/n)"
     read install_required
 
 # Check user input for installing required dependencies
@@ -233,9 +254,10 @@ then
     packages_to_install=(
         "git:git_installed"
         "wget:wget_installed"
-        "qemu-system-x86_64:qemu_full_installed"
-        "libvirt-daemon-system:libvirt_installed"
+        "qemu:qemu_full_installed"
+        "libvirt:libvirt_installed"
         "dnsmasq:dnsmasq_installed"
+        "python3:python_installed"
         "python3-pip:python_installed"
     )
     for package in "${packages_to_install[@]}"; do
@@ -244,12 +266,12 @@ then
         if [[ "${!var_name}" -eq 0 ]]; then
             echo
             echo "Installing $pkg_name"
-            sudo apt-get install "$pkg_name" -y > /dev/null & showLoading $!
+            $INSTALL_CMD "$pkg_name" > /dev/null & showLoading $!
             checkInstalledProgram "$pkg_name" "$var_name"
             echo ────────────────────
         fi
     done
-    sudo systemctl enable libvirtd  # Enable libvirtd service if it was installed
+    $ENABLE_SERVICE_CMD  # Enable libvirtd service if it was installed
 else
     echo "Required dependencies installation skipped. Exiting."
     exit 1
@@ -261,7 +283,7 @@ then
 echo
 else
 echo
-echo "Install Optional Dependencies? (required admin permision) (y/n)"
+echo "Install Optional Dependencies? (required admin permission) (y/n)"
 read install_optional
 
 # Check user input for installing optional dependencies
@@ -275,14 +297,14 @@ then
     if [[ $virt_manager_installed -eq 0 ]]; then
         echo
         echo "Installing Virt-Manager"
-        sudo apt-get install virt-manager -y  > /dev/null & showLoading $!
+        $INSTALL_CMD virt-manager > /dev/null & showLoading $!
         checkInstalledProgram virt-manager virt_manager_installed
         echo ────────────────────
     fi
     if [[ $virsh_installed -eq 0 ]]; then
         echo
         echo "Installing virsh"
-        sudo apt-get install virsh -y  > /dev/null & showLoading $!
+        $INSTALL_CMD virsh > /dev/null & showLoading $!
         checkInstalledProgram virsh virsh_installed
         echo ────────────────────
     fi
@@ -290,13 +312,13 @@ then
         echo
         echo "Installing python pypresence"
         pip install pypresence > /dev/null & showLoading $!
-        checkPipPackage python-pypresence python_pypresence_installed
+        checkPipPackage pypresence python_pypresence_installed
         echo ────────────────────
     fi
     if [[ $nbd_installed -eq 0 ]]; then
         echo
         echo "Installing NBD"
-        sudo apt-get install nbd-client -y > /dev/null & showLoading $!
+        $INSTALL_CMD nbd-client > /dev/null & showLoading $!
         checkInstalledProgram nbd-client nbd_installed
         echo ────────────────────
     fi
@@ -313,7 +335,7 @@ then
     clear
     echo "Clone ultimate-macOS-KVM"
     git clone https://github.com/Coopydood/ultimate-macOS-KVM -q > /dev/null & showLoading $!
-    cd ultimate-macOS-KVM
+    cd ultimate-macOS-KVM || exit
     echo ──────────────────────────────────────────────
     clear
     echo ──────────────────────────────────────────────
@@ -329,4 +351,3 @@ else
     echo "Not all required dependencies are installed. Please install them and try again."
     exit 1
 fi
-
