@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/usr/bin/bash
+
+# shellcheck disable=SC2016
 
 # Initialize the status variables for each program
 git_installed=0
