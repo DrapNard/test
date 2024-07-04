@@ -254,8 +254,8 @@ then
     packages_to_install=(
         "git:git_installed"
         "wget:wget_installed"
-        "qemu:qemu_full_installed"
-        "libvirt:libvirt_installed"
+        "qemu-system-x86_64:qemu_full_installed"
+        "libvirt-daemon-system:libvirt_installed"
         "dnsmasq:dnsmasq_installed"
         "python3:python_installed"
         "python3-pip:python_installed"
@@ -271,6 +271,7 @@ then
             echo ────────────────────
         fi
     done
+    checkInstalledlibvirt libvirt libvirt_installed
     $ENABLE_SERVICE_CMD  # Enable libvirtd service if it was installed
 else
     echo "Required dependencies installation skipped. Exiting."
