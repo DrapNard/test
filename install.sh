@@ -177,7 +177,6 @@ echo                                                Installation Script by DrapN
 echo ──────────────────────────────────────────────
 echo "Hardware Requirements:"
 checkKernelVersion
-echo "Motherboard:"
 checkVirtualization
 checkUEFI
 checkCPUCores
