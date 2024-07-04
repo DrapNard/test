@@ -257,7 +257,6 @@ then
         "qemu-system:qemu_full_installed"
         "libvirt-daemon-system:libvirt_installed"
         "dnsmasq:dnsmasq_installed"
-        "python3:python_installed"
         "python3-pip:python_installed"
     )
     for package in "${packages_to_install[@]}"; do
