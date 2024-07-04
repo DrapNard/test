@@ -254,8 +254,6 @@ then
     packages_to_install=(
         "git:git_installed"
         "wget:wget_installed"
-        "qemu-system:qemu_full_installed"
-        "libvirt-daemon-system:libvirt_installed"
         "dnsmasq:dnsmasq_installed"
         "python3-pip:python_installed"
     )
@@ -270,8 +268,33 @@ then
             echo ────────────────────
         fi
     done
-    checkInstalledlibvirt libvirt libvirt_installed
-    $ENABLE_SERVICE_CMD  # Enable libvirtd service if it was installed
+    if [[ $qemu_full_installed -eq 0 ]]; then
+        echo
+        echo "Installing QEMU"
+        if command -v apt-get &> /dev/null; then
+            sudo apt-get install -y qemu-system > /dev/null & showLoading $!
+        elif command -v pacman &> /dev/null; then
+            sudo pacman -S --noconfirm qemu-full > /dev/null & showLoading $!
+        elif command -v yum &> /dev/null; then
+            sudo dnf install -y qemu > /dev/null & showLoading $!
+        fi
+        checkInstalledProgram qemu-system-x86_64 qemu_full_installed
+        echo ────────────────────
+    fi
+    if [[ $libvirt_installed -eq 0 ]]; then
+        echo
+        echo "Installing virsh"
+        if command -v apt-get &> /dev/null; then
+            sudo apt-get install -y libvirt-daemon-system > /dev/null & showLoading $!
+        elif command -v pacman &> /dev/null; then
+            sudo pacman -S --noconfirm libvirt > /dev/null & showLoading $!
+        elif command -v yum &> /dev/null; then
+            sudo dnf install -y libvirt > /dev/null & showLoading $!
+        fi
+        $ENABLE_SERVICE_CMD
+        checkInstalledlibvirt libvirt libvirt_installed
+        echo ────────────────────
+    fi
 else
     echo "Required dependencies installation skipped. Exiting."
     exit 1
