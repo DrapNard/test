@@ -254,7 +254,7 @@ then
     packages_to_install=(
         "git:git_installed"
         "wget:wget_installed"
-        "qemu-system-x86_64:qemu_full_installed"
+        "qemu-system:qemu_full_installed"
         "libvirt-daemon-system:libvirt_installed"
         "dnsmasq:dnsmasq_installed"
         "python3:python_installed"
