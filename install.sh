@@ -352,7 +352,11 @@ then
     if [[ $python_pypresence_installed -eq 0 ]]; then
         echo
         echo "Installing python pypresence"
+        if command -v pacman &> /dev/null; then
+            sudo pacman -S --noconfirm python-pypresence > /dev/null & showLoading $!
+        else
         pip install pypresence > /dev/null & showLoading $!
+        fi
         checkPipPackage pypresence python_pypresence_installed
         echo ────────────────────
     fi
