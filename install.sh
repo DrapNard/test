@@ -187,7 +187,11 @@ checkInstalledProgram git git_installed
 checkInstalledProgram wget wget_installed
 checkInstalledProgram qemu-system-x86_64 qemu_full_installed
 checkInstalledlibvirt libvirt libvirt_installed
+if command -v apt-get &> /dev/null; then
+checkInstalledProgram dig dnsmasq_installed
+else
 checkInstalledProgram dnsmasq dnsmasq_installed
+fi
 checkInstalledProgram python3 python_installed
 checkInstalledProgram pip python_installed
 echo ──────────────────────────────────────────────
