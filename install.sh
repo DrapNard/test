@@ -226,13 +226,13 @@ elif command -v pacman &> /dev/null; then
     INSTALL_CMD="sudo pacman -S --noconfirm"
     PACKAGE_CHECK_CMD="pacman -Qi"
     ENABLE_SERVICE_CMD="sudo systemctl enable libvirtd"
-elif command -v yum &> /dev/null; then
-    PACKAGE_MANAGER="yum"
-    INSTALL_CMD="sudo yum install -y"
+elif command -v dnf &> /dev/null; then
+    PACKAGE_MANAGER="dnf"
+    INSTALL_CMD="sudo dnf install -y"
     PACKAGE_CHECK_CMD="rpm -q"
     ENABLE_SERVICE_CMD="sudo systemctl enable libvirtd"
 else
-    echo "Unsupported package manager. Please use a system with apt, pacman, or yum."
+    echo "Unsupported package manager. Please use a system with apt, pacman, or dnf."
     exit 1
 fi
 
@@ -275,7 +275,7 @@ then
             sudo apt-get install -y qemu-system > /dev/null & showLoading $!
         elif command -v pacman &> /dev/null; then
             sudo pacman -S --noconfirm qemu-full > /dev/null & showLoading $!
-        elif command -v yum &> /dev/null; then
+        elif command -v dnf &> /dev/null; then
             sudo dnf install -y qemu > /dev/null & showLoading $!
         fi
         checkInstalledProgram qemu-system-x86_64 qemu_full_installed
@@ -283,16 +283,21 @@ then
     fi
     if [[ $libvirt_installed -eq 0 ]]; then
         echo
-        echo "Installing virsh"
+        echo "Installing libvirt"
         if command -v apt-get &> /dev/null; then
             sudo apt-get install -y libvirt-daemon-system > /dev/null & showLoading $!
         elif command -v pacman &> /dev/null; then
             sudo pacman -S --noconfirm libvirt > /dev/null & showLoading $!
-        elif command -v yum &> /dev/null; then
+        elif command -v dnf &> /dev/null; then
             sudo dnf install -y libvirt > /dev/null & showLoading $!
         fi
-        $ENABLE_SERVICE_CMD
+        sudo systemctl enable libvirtd
+        sudo systemctl start libvirtd
         checkInstalledlibvirt libvirt libvirt_installed
+        if [[ $libvirt_installed -eq 0 ]] ; then
+            sudo systemctl enable libvirtd
+            checkInstalledlibvirt libvirt libvirt_installed
+        fi
         echo ────────────────────
     fi
 else
