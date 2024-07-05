@@ -255,7 +255,6 @@ then
         "git:git_installed"
         "wget:wget_installed"
         "dnsmasq:dnsmasq_installed"
-        "python3-pip:python_installed"
     )
     for package in "${packages_to_install[@]}"; do
         pkg_name="${package%%:*}"
@@ -268,6 +267,20 @@ then
             echo ────────────────────
         fi
     done
+    if [[ $python_installed -eq 0 ]]; then
+        echo
+        echo "Installing Python"
+        if command -v apt-get &> /dev/null; then
+            sudo apt-get install -y python3-pip > /dev/null & showLoading $!
+        elif command -v pacman &> /dev/null; then
+            sudo pacman -S --noconfirm python-pip > /dev/null & showLoading $!
+        elif command -v dnf &> /dev/null; then
+            sudo dnf install -y python-pip > /dev/null & showLoading $!
+        fi
+        checkInstalledProgram python python_installed
+        checkInstalledProgram pip python_installed
+        echo ────────────────────
+    fi
     if [[ $qemu_full_installed -eq 0 ]]; then
         echo
         echo "Installing QEMU"
@@ -346,7 +359,13 @@ then
     if [[ $nbd_installed -eq 0 ]]; then
         echo
         echo "Installing NBD"
-        $INSTALL_CMD nbd-client > /dev/null & showLoading $!
+        if command -v apt-get &> /dev/null; then
+            sudo apt-get install -y nbd-client > /dev/null & showLoading $!
+        elif command -v nbd &> /dev/null; then
+            sudo pacman -S --noconfirm libvirt > /dev/null & showLoading $!
+        elif command -v dnf &> /dev/null; then
+            sudo dnf install -y nbd > /dev/null & showLoading $!
+        fi
         checkInstalledProgram nbd-client nbd_installed
         echo ────────────────────
     fi
